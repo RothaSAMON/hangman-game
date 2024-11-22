@@ -27,9 +27,10 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ~/.npm
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/package-lock.json') }}
+          key: macos-node-modules-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
-            ${{ runner.os }}-node-modules-
+            macos-node-modules-
+
 
       # Step 4: Install dependencies
       - name: Install dependencies
@@ -51,6 +52,7 @@ jobs:
   deploy:
     runs-on: self-hosted # This runs the deploy job on your self-hosted runner
     needs: build # This job depends on the successful completion of the build job
+    timeout-minutes: 5 
     steps:
       # Step 1: Download the build artifacts from the build job
       - name: Download build artifacts
