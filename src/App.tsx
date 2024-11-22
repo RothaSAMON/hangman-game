@@ -67,7 +67,7 @@ function App() {
   return (
     <div className="max-w-[800px] flex flex-col gap-8 mx-auto items-center">
       <h1 className="text-5xl">
-        Hello from github action and it worked
+        Game Jong kor
       </h1>
       <div className="text-center text-[20px]">
         {isWinner && "Winner! - Enter to try againt"}
