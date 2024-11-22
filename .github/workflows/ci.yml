@@ -10,23 +10,23 @@ on:
 
 jobs:
   build:
-    runs-on: self-hosted  # This runs the job on your self-hosted runner
+    runs-on: self-hosted # This runs the job on your self-hosted runner
     steps:
       # Step 1: Check out the code from the repository
       - name: Checkout code
-        uses: actions/checkout@v2
-        
+        uses: actions/checkout@v3
+
       # Step 2: Set up Node.js (if using Node.js for Vite)
       - name: Set up Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
-          node-version: '16'  # specify the Node.js version you need
+          node-version: "16" # specify the Node.js version you need
 
       # Step 3: Install dependencies
       - name: Install dependencies
         run: |
           npm install
-        
+
       # Step 4: Build project (assuming using Vite)
       - name: Build project
         run: |
@@ -34,21 +34,21 @@ jobs:
 
       # Step 5: Upload build artifacts for the deploy job
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: dist
-          path: ./dist  # Path to the build output directory
+          path: ./dist # Path to the build output directory
 
   deploy:
-    runs-on: self-hosted  # This runs the deploy job on your self-hosted runner
-    needs: build  # This job depends on the successful completion of the build job
+    runs-on: self-hosted # This runs the deploy job on your self-hosted runner
+    needs: build # This job depends on the successful completion of the build job
     steps:
       # Step 1: Download the build artifacts from the build job
       - name: Download build artifacts
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: dist
-        
+
       # Step 2: Set up SSH key for remote server access
       - name: Set up SSH key
         run: |
@@ -59,7 +59,7 @@ jobs:
       - name: Copy build files to server
         run: |
           scp -i private_key.pem -r ./dist/ ubuntu@game.rothasamon.site:/home/ubuntu/dist
-        
+
       # Step 4: Restart Nginx to apply changes
       - name: Restart Nginx to apply changes
         run: |
