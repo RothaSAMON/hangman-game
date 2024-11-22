@@ -70,8 +70,8 @@ function App() {
         Game Jong kor
       </h1>
       <div className="text-center text-[20px]">
-        {isWinner && "Winner! - Enter to try againt"}
-        {isLoser && "Nice Try! - Enter to try againt"}
+        {isWinner && "Winner! - Enter to try again"}
+        {isLoser && "Nice Try! - Enter to try again"}
       </div>
 
       <HangmanDrawing numberOfGuesses={incorrectLetters.length} />
