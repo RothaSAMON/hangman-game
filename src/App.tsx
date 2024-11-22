@@ -9,10 +9,6 @@ function getWord() {
 }
 
 function App() {
-  // const [wordToGuess, setWordToGuess] = useState(() => {
-  //   return words[Math.floor(Math.random() * words.length)];
-  // });
-
   const [wordToGuess, setWordToGuess] = useState(getWord);
 
   const [guessedLetters, setGuessedLetters] = useState<string[]>([]);
@@ -34,12 +30,6 @@ function App() {
     },
     [guessedLetters, isWinner, isLoser]
   );
-
-  // function addGuessedLetter(letter: string) {
-  //   if (guessedLetters.includes(letter)) return;
-
-  //   setGuessedLetters((currentLetters) => [...currentLetters, letter]);
-  // }
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
