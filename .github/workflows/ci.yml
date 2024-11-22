@@ -1,3 +1,77 @@
+# name: CI/CD Pipeline with Self-hosted Runner
+
+# on:
+#   push:
+#     branches:
+#       - main
+#   pull_request:
+#     branches:
+#       - main
+
+# jobs:
+#   build:
+#     runs-on: self-hosted # This runs the job on your self-hosted runner
+#     steps:
+#       # Step 1: Check out the code from the repository
+#       - name: Checkout code
+#         uses: actions/checkout@v3
+
+#       # Step 2: Set up Node.js (if using Node.js for Vite)
+#       - name: Set up Node.js
+#         uses: actions/setup-node@v3
+#         with:
+#           node-version: "16" # specify the Node.js version you need
+
+#       # Step 3: Install dependencies
+#       - name: Install dependencies
+#         run: |
+#           npm install
+
+#       # Step 4: Build project (assuming using Vite)
+#       - name: Build project
+#         run: |
+#           npm run build
+
+#       # Step 5: Upload build artifacts for the deploy job
+#       - name: Upload build artifacts
+#         uses: actions/upload-artifact@v3
+#         with:
+#           name: dist
+#           path: ./dist # Path to the build output directory
+
+#   deploy:
+#     runs-on: self-hosted # This runs the deploy job on your self-hosted runner
+#     needs: build # This job depends on the successful completion of the build job
+#     steps:
+#       # Step 1: Download the build artifacts from the build job
+#       - name: Download build artifacts
+#         uses: actions/download-artifact@v3
+#         with:
+#           name: dist
+
+#       # Step 2: Set up SSH key for remote server access
+#       - name: Set up SSH key
+#         run: |
+#           echo "$SSH_PRIVATE_KEY" > private_key.pem
+#           chmod 600 private_key.pem
+
+#       # Step 3: Copy build files (dist folder) to your Ubuntu server
+#       - name: Copy build files to server
+#         run: |
+#           scp -i private_key.pem -r ./dist/ ubuntu@game.rothasamon.site:/home/ubuntu/dist
+
+#       # Step 4: Restart Nginx to apply changes
+#       - name: Restart Nginx to apply changes
+#         run: |
+#           ssh -i private_key.pem ubuntu@game.rothasamon.site "sudo systemctl restart nginx"
+
+#     # Set the environment variables (the SSH private key is stored securely in GitHub Secrets)
+#     env:
+#       SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+
+# ----------------------------------------
+# ----------------------------------------
+
 name: CI/CD Pipeline with Self-hosted Runner
 
 on:
@@ -10,33 +84,38 @@ on:
 
 jobs:
   build:
-    runs-on: self-hosted  # This runs the job on your self-hosted runner
+    runs-on: self-hosted # This runs the job on your self-hosted runner
     steps:
+      # Step 1: Check out the code from the repository
       - name: Checkout code
         uses: actions/checkout@v3
 
+      # Step 2: Set up Node.js (if using Node.js for Vite)
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: "16"  # specify the Node.js version you need
+          node-version: "16" # specify the Node.js version you need
 
+      # Step 3: Install dependencies
       - name: Install dependencies
         run: |
           npm install
 
+      # Step 4: Build project (assuming using Vite)
       - name: Build project
         run: |
           npm run build
 
+      # Step 5: Upload build artifacts for the deploy job
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3
         with:
           name: dist
-          path: ./dist  # Path to the build output directory
+          path: ./dist # Path to the build output directory
 
   deploy:
-    runs-on: self-hosted  # This runs the deploy job on your self-hosted runner
-    needs: build  # This job depends on the successful completion of the build job
+    runs-on: self-hosted # This runs the deploy job on your self-hosted runner
+    needs: build # This job depends on the successful completion of the build job
     steps:
       # Step 1: Download the build artifacts from the build job
       - name: Download build artifacts
@@ -58,22 +137,24 @@ jobs:
           echo "game.rothasamon.site ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBLSrIwc3+EYyIZqnW9IvLwb+/xqX1dWuqGWjqd0UsMOvVyxwoUsASCUHstIj9XolnM2D92oe+UR0reJfMTEypN4=" >> ~/.ssh/known_hosts
           echo "game.rothasamon.site ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIZrYKZHHvW19+fOoD+2KQUQgZiSRuZ4y8p8VcAFnXjM" >> ~/.ssh/known_hosts
 
-      # Step 4: SSH to the server, delete old dist folder and copy new dist folder
+      # Step 4: Copy build files (dist folder) to your Ubuntu server
       - name: Delete old dist directory and copy new dist files to server
-        run: |
-          # SSH into the server, delete the old dist folder, and copy the new dist folder
+      run: |
+          # SSH into the server and delete the old dist folder
           ssh -i private_key.pem ubuntu@game.rothasamon.site << 'EOF'
             # Delete the old dist folder
             rm -rf /home/ubuntu/dist/*
-
-            # Copy the new dist files from GitHub Actions runner
-            scp -i private_key.pem -r ~/actions-runner/_work/your-repository-name/dist/* ubuntu@game.rothasamon.site:/home/ubuntu/dist
           EOF
+
+          # Now copy the new dist directory to the remote server
+          scp -i private_key.pem -r ./dist/* ubuntu@game.rothasamon.site:/home/ubuntu/dist
+
 
       # Step 5: Restart Nginx to apply changes
       - name: Restart Nginx to apply changes
         run: |
           ssh -i private_key.pem ubuntu@game.rothasamon.site "sudo systemctl restart nginx"
 
+    # Set the environment variables (the SSH private key is stored securely in GitHub Secrets)
     env:
       SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
