@@ -39,32 +39,71 @@ jobs:
           name: dist
           path: ./dist # Path to the build output directory
 
-  deploy:
-    runs-on: self-hosted # This runs the deploy job on your self-hosted runner
-    needs: build # This job depends on the successful completion of the build job
-    steps:
-      # Step 1: Download the build artifacts from the build job
-      - name: Download build artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: dist
+  # deploy:
+  #   runs-on: self-hosted # This runs the deploy job on your self-hosted runner
+  #   needs: build # This job depends on the successful completion of the build job
+  #   steps:
+  #     # Step 1: Download the build artifacts from the build job
+  #     - name: Download build artifacts
+  #       uses: actions/download-artifact@v3
+  #       with:
+  #         name: dist
 
-      # Step 2: Set up SSH key for remote server access
-      - name: Set up SSH key
-        run: |
-          echo "$SSH_PRIVATE_KEY" > private_key.pem
-          chmod 600 private_key.pem
+  #     # Step 2: Set up SSH key for remote server access
+  #     - name: Set up SSH key
+  #       run: |
+  #         echo "$SSH_PRIVATE_KEY" > private_key.pem
+  #         chmod 600 private_key.pem
 
-      # Step 3: Copy build files (dist folder) to your Ubuntu server
-      - name: Copy build files to server
-        run: |
-          scp -i private_key.pem -r ./dist/ ubuntu@game.rothasamon.site:/home/ubuntu/dist
+  #     # Step 3: Copy build files (dist folder) to your Ubuntu server
+  #     - name: Copy build files to server
+  #       run: |
+  #         scp -i private_key.pem -r ./dist/ ubuntu@game.rothasamon.site:/home/ubuntu/dist
 
-      # Step 4: Restart Nginx to apply changes
-      - name: Restart Nginx to apply changes
-        run: |
-          ssh -i private_key.pem ubuntu@game.rothasamon.site "sudo systemctl restart nginx"
+  #     # Step 4: Restart Nginx to apply changes
+  #     - name: Restart Nginx to apply changes
+  #       run: |
+  #         ssh -i private_key.pem ubuntu@game.rothasamon.site "sudo systemctl restart nginx"
 
-    # Set the environment variables (the SSH private key is stored securely in GitHub Secrets)
-    env:
-      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+  #   # Set the environment variables (the SSH private key is stored securely in GitHub Secrets)
+  #   env:
+  #     SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+
+
+# ----------------------------------------
+
+
+deploy:
+  runs-on: self-hosted
+  needs: build
+  steps:
+    # Step 1: Download the build artifacts from the build job
+    - name: Download build artifacts
+      uses: actions/download-artifact@v3
+      with:
+        name: dist
+
+    # Step 2: Set up SSH key for remote server access
+    - name: Set up SSH key
+      run: |
+        echo "$SSH_PRIVATE_KEY" > private_key.pem
+        chmod 600 private_key.pem
+
+    # Step 3: Add server to known hosts (Secure Approach)
+    - name: Add server to known hosts
+      run: |
+        ssh-keyscan -H game.rothasamon.site >> ~/.ssh/known_hosts
+
+    # Step 4: Copy build files (dist folder) to your Ubuntu server
+    - name: Copy build files to server
+      run: |
+        scp -i private_key.pem -r ./dist/ ubuntu@game.rothasamon.site:/home/ubuntu/dist
+
+    # Step 5: Restart Nginx to apply changes
+    - name: Restart Nginx to apply changes
+      run: |
+        ssh -i private_key.pem ubuntu@game.rothasamon.site "sudo systemctl restart nginx"
+
+  # Set the environment variables (the SSH private key is stored securely in GitHub Secrets)
+  env:
+    SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
