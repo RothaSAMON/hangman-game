@@ -22,17 +22,26 @@ jobs:
         with:
           node-version: "20" # specify the Node.js version you need
 
-      # Step 3: Install dependencies
+      # Step 3: Cache node_modules
+      - name: Cache node_modules
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-modules-
+
+      # Step 4: Install dependencies
       - name: Install dependencies
         run: |
           npm install
 
-      # Step 4: Build project (assuming using Vite)
+      # Step 5: Build project (assuming using Vite)
       - name: Build project
         run: |
           npm run build
 
-      # Step 5: Upload build artifacts for the deploy job
+      # Step 6: Upload build artifacts for the deploy job
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3
         with:
