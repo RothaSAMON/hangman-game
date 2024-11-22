@@ -69,9 +69,7 @@ jobs:
   #   env:
   #     SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 
-
 # ----------------------------------------
-
 
 deploy:
   runs-on: self-hosted
@@ -89,10 +87,13 @@ deploy:
         echo "$SSH_PRIVATE_KEY" > private_key.pem
         chmod 600 private_key.pem
 
-    # Step 3: Add server to known hosts (Secure Approach)
+    # Step 3: Add server to known hosts
     - name: Add server to known hosts
       run: |
-        ssh-keyscan -H game.rothasamon.site >> ~/.ssh/known_hosts
+        mkdir -p ~/.ssh
+        echo "game.rothasamon.site ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDH9MqV8pZThJ3li/nuKV20aA8EF63ksZqlWX54eRwxY/0CVSJMRP0eMPU6L+gQ65joL5wJvMosJ0zcVNpJGZTRR5JphlpCudm2XotStBgEnDh9S66ibG6tK29RmQ+4XezAUD+6OCSPTfxJAPOV+iLH1HcgCVNtT6flpkIZLifOvcMKh2gczwkGt30SPOyEdXsDQWvv/sthAgUwqD1gloWzcayh6ZDIx8YVFse1r7FW4HPJmRxQB5mXV/z/FjZsLGXvXKm1ucuqRZqBfLqYJSAcF6DuT9TzJqD2Lj2/YtwqFGbhbi6LPmvhHTelzu0PcsK0ttc28dD3ScBNdb4tTj/PKwhdSumiiSZbkbS+vVnd3qRtv0+okE/NrhY+MCpsU1bGdPLSKYulvrqpDuYzn+0SxM46LTd3VeBtzX9dKFlupKIp+YYJicorpBAZ7GmHVdXcN0dMqn3wsNI5tSvQfScniLjRXCFPLfKYXfDuSwiSGNXA06dhuPEyk7kewrxguG0=" >> ~/.ssh/known_hosts
+        echo "game.rothasamon.site ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBLSrIwc3+EYyIZqnW9IvLwb+/xqX1dWuqGWjqd0UsMOvVyxwoUsASCUHstIj9XolnM2D92oe+UR0reJfMTEypN4=" >> ~/.ssh/known_hosts
+        echo "game.rothasamon.site ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIZrYKZHHvW19+fOoD+2KQUQgZiSRuZ4y8p8VcAFnXjM" >> ~/.ssh/known_hosts
 
     # Step 4: Copy build files (dist folder) to your Ubuntu server
     - name: Copy build files to server
